@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PUFF &amp; STUFF – Mochi Kiosk OS Simulator</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#1f4a30;--card:#e8e3d6;--ink:#2e2447;--mute:#645a7c;--line:#cbc2d8;--pink:#6f4fb8;--pink2:#d9cfee;--tile:#8C7AA9;--mono:#dcd6c6;--paper:#fffefa}
+@media not all{:root{--bg:#1d1928;--card:#272136;--ink:#f1ebfb;--mute:#aaa0c2;--line:#3d3454;--pink:#b49bf0;--pink2:#3a3055;--tile:#31294a;--mono:#211c2e;--paper:#fffefa}}
+:root[data-theme="off"]{--bg:#1d1928;--card:#272136;--ink:#f1ebfb;--mute:#aaa0c2;--line:#3d3454;--pink:#b49bf0;--pink2:#3a3055;--tile:#31294a;--mono:#211c2e;--paper:#fffefa}
+html,body{background:#1f4a30!important}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Comic Sans MS","Comic Sans","Chalkboard SE","Comic Neue",cursive}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #0d1c38;background:#14284b}
+h1{margin:0;font-size:22px;letter-spacing:1px;color:#d9c9ff}h1 small{display:block;font-size:11px;letter-spacing:0;color:#b9c4dd;font-weight:400}
+.seg{display:inline-flex;border:1px solid #5a6f9c;border-radius:999px;overflow:hidden}
+.seg button{border:0;background:none;color:#fff;padding:7px 14px;cursor:pointer;font:inherit}
+.seg button.on{background:#8C7AA9;color:#1f1633}
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;padding:16px;max-width:1300px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:15px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--pink2);border-color:var(--pink);color:var(--pink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{position:relative;background:var(--tile);border-radius:14px;padding:10px 6px 10px;text-align:center;cursor:pointer;border:1px solid transparent;overflow:hidden;font:inherit;color:#1f1633}
+.tile:hover{border-color:var(--pink)}
+.tile img,.tile .em{width:116px;height:102px;object-fit:contain;display:block;margin:6px auto 4px}
+.tile .em{font-size:44px;line-height:102px}
+.tile b{display:block;font-size:14px;font-weight:600}.tile span{font-size:13px;color:#1f1633}
+.rib{position:absolute;top:10px;left:-26px;width:90px;transform:rotate(-45deg);font-size:10px;font-weight:700;color:#fff;background:#d4477f;padding:2px 0;letter-spacing:.5px}
+.rib.new{background:#e9962f}.rib.kid{background:#3a9bb5}
+.btn{border:0;background:#8C7AA9;color:#1f1633;border-radius:10px;padding:7px 10px;cursor:pointer;font:inherit}
+.btn.alt{background:var(--pink2);color:var(--pink)}.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.q button{border:1px solid var(--line);background:none;color:var(--ink);border-radius:6px;width:24px;cursor:pointer}
+.tot{font-weight:700;font-size:17px;display:flex;justify-content:space-between;margin:10px 0}
+.sm{font-size:12px;color:var(--mute)}
+.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600}
+.NEW,.READY{background:#fde9b8;color:#6b4a00}.WAITING{background:#d9e6ff;color:#1d3f87}.RUNNING{background:#c9f2d6;color:#0b5a2b}.DONE{background:#e4e0e8;color:#444}
+.mode{padding:3px 10px;border-radius:999px;font-weight:700;font-size:12px}.user{background:#d9e6ff;color:#1d3f87}.kernel{background:#ffd5d5;color:#8a1c1c}
+.gantt{display:flex;overflow-x:auto;gap:2px;padding:6px 0;min-height:48px}
+.gb{min-width:30px;height:34px;border-radius:5px;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.gb.idle{background:var(--line);color:var(--mute)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;min-height:30px}.chip{border:1px solid var(--line);background:var(--mono);border-radius:8px;padding:3px 9px;font:600 12px ui-monospace,Menlo,monospace}
+.chip.pick{cursor:pointer;font:inherit;font-size:13px;color:var(--ink);padding:5px 11px}.chip.pick.on{background:var(--pink2);border-color:var(--pink);color:var(--pink)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.scroll{overflow-x:auto}
+.log{font:12px/1.5 ui-monospace,Menlo,monospace;background:var(--mono);border-radius:8px;padding:8px;max-height:170px;overflow:auto}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select,input[type=number]{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;font:inherit}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pink)}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:20;overflow:auto}
+.modal.show{display:flex}.dlg{background:var(--card);border-radius:16px;padding:18px;max-width:420px;width:100%}
+.dlg h3{margin:0 0 6px}.grp{margin:10px 0 4px;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.5px}
+.paper{position:relative;background:var(--paper);color:#222;max-width:320px;width:100%;padding:20px 18px 26px;font:12.5px/1.5 ui-monospace,"Courier New",monospace;
+ -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/14px 7px repeat-x,linear-gradient(#000 0 0) top/100% calc(100% - 6px) no-repeat;
+ mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/14px 7px repeat-x,linear-gradient(#000 0 0) top/100% calc(100% - 6px) no-repeat}
+.paper .c{text-align:center}.paper hr{border:0;border-top:1px dashed #999;margin:8px 0}
+.paper .r{display:flex;justify-content:space-between;gap:8px}.paper .ind{padding-left:14px;color:#555}
+.paper .no{font-size:30px;font-weight:700;letter-spacing:2px;margin:2px 0}
+.bc{height:40px;margin:10px 0 4px;background:repeating-linear-gradient(90deg,#222 0 2px,#0000 2px 4px,#222 4px 5px,#0000 5px 8px,#222 8px 11px,#0000 11px 13px,#222 13px 14px,#0000 14px 16px)}
+.os-only{display:none}body.os .os-only{display:block}
+.mute{color:var(--mute)}
+</style></head><body>
+<header>
+ <h1>PUFF &amp; STUFF<small>Mochi kiosk · Mini OS simulator · Platform Technologies</small></h1>
+ <div class="seg" role="group" aria-label="Dual view"><button id="vStory" class="on">Story View</button><button id="vOS">OS View</button></div>
+</header>
+<main>
+<section>
+ <div class="card"><h2>Menu <span class="mode user" style="margin-left:6px">USER MODE</span></h2>
+  <div class="tabs" id="tabs"></div><div class="grid" id="menu"></div></div>
+ <div class="card"><h2>Kitchen status</h2><div id="story"></div></div>
+ <div class="os-only">
+  <div class="card"><h2>Gantt chart</h2><div class="gantt" id="gantt"></div></div>
+  <div class="card"><h2>Process Control Blocks</h2><div class="scroll"><table id="pcb"></table></div></div>
+  <div class="card"><h2>Thread Control Blocks (child threads)</h2><div class="scroll"><table id="tcb"></table></div></div>
+ </div>
+</section>
+<aside>
+ <div class="card"><h2>Your cart</h2><div id="cart"></div>
+  <div class="tot"><span>Subtotal</span><span id="sub">₱0</span></div>
+  <button class="btn" id="checkout" style="width:100%">Proceed to checkout</button></div>
+ <div class="card"><h2>Kitchen scheduler <span class="mode kernel">KERNEL MODE</span></h2>
+  <div class="ctl">
+   <select id="algo"><option value="FCFS">FCFS</option><option value="SJF">SJF</option><option value="RR">Round Robin</option><option value="PRIO">Priority</option></select>
+   <label class="mute">Quantum <input type="number" id="q" value="2" min="1" max="6" style="width:56px"></label>
+  </div>
+  <div class="ctl" style="margin-top:8px">
+   <button class="btn" id="play">Pause</button><button class="btn alt" id="step">Step</button>
+   <select id="spd"><option value="1200">Slow</option><option value="700" selected>Normal</option><option value="250">Fast</option></select>
+   <button class="btn alt" id="rand">+ Random order</button><button class="btn alt" id="reset">Reset</button>
+  </div>
+  <p class="mute" style="margin:10px 0 4px">Clock: <b id="clk">0</b> · Context switches: <b id="ctx">0</b> · CPU: <b id="cpu">idle</b> · Mode: <span id="md" class="mode user">USER</span></p>
+  <p class="mute" style="margin:6px 0 4px">Ready queue (next to run first)</p><div class="chips" id="rq"></div>
+ </div>
+ <div class="card os-only"><h2>System calls &amp; kernel log</h2><div class="log" id="log"></div></div>
+</aside>
+</main>
+<div class="modal" id="cm"><div class="dlg" id="cd"></div></div>
+<div class="modal" id="modal"><div id="rc"></div></div>
+<script>
+const IMG={/* base64 mochi images removed here for readability: keys m,s,cc,ma,pf,co,v,pi,cn,ch */};
+const MENU=[
+{id:'m',n:'Mango',c:'Classics',p:79},{id:'ch',n:'Chocolate',c:'Classics',p:79},{id:'s',n:'Strawberry',c:'Classics',p:79,kid:1},{id:'v',n:'Vanilla',c:'Classics',p:69,kid:1},{id:'co',n:'Coffee',c:'Classics',p:85},
+{id:'cc',n:'Cheesecake',c:'Premium',p:109},{id:'ma',n:'Matcha',c:'Premium',p:109},{id:'pi',n:'Pistachio',c:'Premium',p:129,isNew:1},{id:'pf',n:'Passionfruit',c:'Premium',p:119},{id:'cn',n:'Cookies & Cream',c:'Premium',p:115,kid:1},
+{id:'fm',n:'Mango',c:'Add-ons',g:'Fruits',p:20,add:1,e:'🥭'},{id:'fg',n:'Grape',c:'Add-ons',g:'Fruits',p:20,add:1,e:'🍇'},{id:'fs',n:'Strawberry',c:'Add-ons',g:'Fruits',p:20,add:1,e:'🍓'},
+{id:'to',n:'Oreo',c:'Add-ons',g:'Toppings',p:15,add:1,e:'🍪'},{id:'tc',n:'Choco chips',c:'Add-ons',g:'Toppings',p:15,add:1,e:'🍫'},{id:'tr',n:'Sprinkles',c:'Add-ons',g:'Toppings',p:10,add:1,e:'✨'},
+{id:'bi',n:'Biscoff',c:'Add-ons',g:'Toppings',p:25,add:1,e:'🧇'},{id:'ca',n:'Caramel',c:'Add-ons',g:'Toppings',p:15,add:1,e:'🍯'},{id:'wc',n:'Whipped cream',c:'Add-ons',g:'Toppings',p:15,add:1,e:'🍦'}];
+const BEST=['m','ch','ma'],head=i=>(tab==TABS[2]&&(i.id=='m'||i.id=='s'))?`<h3 style="grid-column:1/-1;margin:8px 0 0;color:var(--pink)">${i.id=='m'?'Best Sellers':'Best for Kids'}</h3>`:'',ADDS=MENU.filter(i=>i.add),get=id=>MENU.find(x=>x.id==id);
+const TABS=['Classics','Premium','Best Sellers / Best for Kids','Add-ons'];
+let tab=TABS[0],cart=[],cur=null,procs=[],clock=0,running=null,qUsed=0,gantt=[],ctx=0,logs=[],pid=101,seq=0,last=null,timer=null,playing=true;
+const $=id=>document.getElementById(id),peso=n=>'₱'+n;
+const hue=p=>`hsl(${(p*47)%360} 55% 42%)`;
+function log(t){logs.push(`[t=${clock}] ${t}`);}
+const lineUnit=l=>get(l.id).p+l.adds.reduce((a,x)=>a+get(x).p,0);
+function renderMenu(){
+ $('tabs').innerHTML=TABS.map(t=>`<button class="${t==tab?'on':''}" data-t="${t}">${t}</button>`).join('');
+ const items=tab==TABS[2]?[...BEST,'s','v','cn'].map(get):MENU.filter(i=>i.c==tab);
+ $('menu').innerHTML=items.map(i=>{
+  const rib=i.add?'':BEST.includes(i.id)?'<i class="rib">BEST</i>':i.isNew?'<i class="rib new">NEW</i>':i.kid?'<i class="rib kid">KIDS</i>':'';
+  const pic=i.add?'':`<img src="${IMG[i.id]}" alt="${i.n}">`;
+  return head(i)+`<button class="tile" data-o="${i.id}">${rib}${pic}<b>${i.n}</b><span>${peso(i.p)}${i.add?' · add-on':''}</span>${BEST.includes(i.id)?'<span style="display:block;color:#7a1236;font-weight:700;font-size:12px">Best seller</span>':i.kid?'<span style="display:block;color:#0d3f52;font-weight:700;font-size:12px">Best for kids</span>':''}</button>`}).join('');
+}
+function renderCart(){
+ let sub=0;
+ $('cart').innerHTML=cart.length?cart.map((l,k)=>{const t=lineUnit(l)*l.q;sub+=t;
+  return `<div class="row" style="align-items:flex-start"><div><b>${get(l.id).n}</b><div class="sm">${l.adds.length?'Add-ons: '+l.adds.map(a=>get(a).n).join(', '):'No add-ons'}</div><button class="btn alt" style="padding:2px 8px;font-size:12px;margin-top:3px" data-e="${k}">Edit add-ons</button></div>
+  <span class="q"><button data-d="${k}">−</button> ${l.q} <button data-u="${k}">+</button></span><span>${peso(t)}</span></div>`}).join(''):'<p class="mute">Your cart is empty. Tap a mochi to add it.</p>';
+ $('sub').textContent=peso(sub);$('checkout').disabled=!cart.length;
+}
+function chipsFor(sel){return ['Fruits','Toppings'].map(g=>`<div class="grp">${g}</div><div class="chips">`+ADDS.filter(a=>a.g==g).map(a=>`<button class="chip pick ${sel.includes(a.id)?'on':''}" data-t2="${a.id}">${a.n} +${peso(a.p)}</button>`).join('')+'</div>').join('');}
+function openCustom(){
+ const c=cur,m=get(c.id),isNew=c.line==null;
+ const price=(m.p+c.adds.reduce((a,x)=>a+get(x).p,0))*c.q;
+ $('cd').innerHTML=`<div style="display:flex;gap:12px;align-items:center"><img src="${IMG[m.id]}" width="72" alt=""><div><h3>${m.n} mochi</h3><div class="sm">${peso(m.p)} each · choose add-ons for this mochi</div></div></div>`+chipsFor(c.adds)+
+ `<div class="row" style="margin-top:12px;border:0">${isNew?`<span class="q"><button data-cq="-1">−</button> ${c.q} <button data-cq="1">+</button></span>`:'<span></span>'}<button class="btn" data-save="1">${isNew?'Add to cart':'Save'} · ${peso(price)}</button></div><button class="btn alt" data-close="1" style="width:100%">Cancel</button>`;
+ $('cm').classList.add('show');
+}
+function openPick(a){
+ $('cd').innerHTML=`<h3>${a.n} (+${peso(a.p)})</h3><div class="sm">Which mochi should this add-on go on?</div><div class="chips" style="margin:12px 0">`+
+ (cart.length?cart.map((l,k)=>`<button class="chip pick ${l.adds.includes(a.id)?'on':''}" data-att="${k}|${a.id}">${get(l.id).n}${l.adds.length?' ('+l.adds.map(x=>get(x).n).join(', ')+')':''}</button>`).join(''):'<span class="mute">Add a mochi to your cart first.</span>')+
+ `</div><button class="btn alt" data-close="1" style="width:100%">Done</button>`;
+ $('cm').classList.add('show');
+}
+function addLine(l){const key=l.id+'|'+[...l.adds].sort();const f=cart.find(x=>x.id+'|'+[...x.adds].sort()==key);f?f.q+=l.q:cart.push(l);}
+function createProc(items){
+ const fq=items.reduce((a,x)=>a+x.q,0);
+ const th=items.flatMap(x=>x.adds.flatMap(a=>Array.from({length:x.q},()=>({name:`${get(a).n} → ${x.m.n}`,st:'READY'}))));
+ const burst=fq*2+(th.length?1:0);
+ const prio=items.some(x=>x.m.kid||BEST.includes(x.m.id))?1:items.some(x=>x.m.c=='Premium')?2:3;
+ const p={pid:pid++,items,arrival:clock,burst,rem:burst,prio,state:'WAITING',io:2,rq:0,start:null,fin:null,threads:th};
+ th.forEach((t,k)=>t.tid=p.pid*10+k+1);
+ log(`SYSCALL sys_create_process() -> PID ${p.pid}, burst=${burst}, priority=${prio}, threads=${th.length}`);
+ if(th.length)log(`SYSCALL sys_thread_create() x${th.length} (children of PID ${p.pid})`);
+ log(`I/O request: payment + e-receipt for PID ${p.pid} -> WAITING (${p.io} ticks)`);
+ procs.push(p);return p;
+}
+function pick(list){const a=$('algo').value;
+ return list.slice().sort((x,y)=>a=='SJF'?(x.rem-y.rem||x.rq-y.rq):a=='PRIO'?(x.prio-y.prio||x.rq-y.rq):x.rq-y.rq);}
+function tick(){
+ clock++;
+ procs.filter(p=>p.state=='WAITING').forEach(p=>{if(--p.io<=0){p.state='READY';p.rq=seq++;log(`I/O complete: PID ${p.pid} WAITING -> READY`);}});
+ const algo=$('algo').value,Q=+$('q').value||2;let cur2=running;
+ if(cur2&&algo=='RR'&&qUsed>=Q&&procs.some(p=>p.state=='READY')){log(`Timer interrupt: quantum ${Q} expired, PID ${cur2.pid} -> READY`);cur2.state='READY';cur2.rq=seq++;running=cur2=null;qUsed=0;}
+ if(!cur2){const n=pick(procs.filter(p=>p.state=='READY'))[0];
+  if(n){cur2=running=n;n.state='RUNNING';qUsed=0;if(n.start==null)n.start=clock;
+   if(last!==n.pid){ctx++;log(`Context switch: ${last==null?'idle':'PID '+last} -> PID ${n.pid} (${algo})`);}
+   n.threads.forEach(t=>t.st='RUNNING');}}
+ if(cur2){cur2.rem--;qUsed++;last=cur2.pid;gantt.push(cur2.pid);
+  if(cur2.rem<=0){log(`PID ${cur2.pid}: sys_thread_join() x${cur2.threads.length}, order packaged -> DONE`);cur2.state='DONE';cur2.fin=clock;cur2.threads.forEach(t=>t.st='DONE');running=null;qUsed=0;}
+ }else gantt.push(0);
+ render();
+}
+function render(){
+ renderCart();
+ $('clk').textContent=clock;$('ctx').textContent=ctx;$('cpu').textContent=running?'PID '+running.pid:'idle';
+ const m=$('md');m.textContent=running?'KERNEL → dispatch':'USER';m.className='mode '+(running?'kernel':'user');
+ $('rq').innerHTML=pick(procs.filter(p=>p.state=='READY')).map(p=>`<span class="chip">P${p.pid}</span>`).join('')||'<span class="mute">empty</span>';
+ $('gantt').innerHTML=gantt.map((g,i)=>g?`<div class="gb" style="background:${hue(g)}" title="t=${i+1}">P${g}</div>`:`<div class="gb idle">·</div>`).join('');
+ $('gantt').scrollLeft=1e5;
+ $('pcb').innerHTML='<tr><th>PID</th><th>State</th><th>Arrival</th><th>Burst</th><th>Left</th><th>Prio</th><th>Threads</th><th>Turnaround</th></tr>'+
+  procs.map(p=>`<tr><td>P${p.pid}</td><td><span class="badge ${p.state}">${p.state}</span></td><td>${p.arrival}</td><td>${p.burst}</td><td>${p.rem}</td><td>${p.prio}</td><td>${p.threads.length}</td><td>${p.fin!=null?p.fin-p.arrival:'–'}</td></tr>`).join('');
+ $('tcb').innerHTML='<tr><th>TID</th><th>Parent</th><th>Add-on → mochi</th><th>State</th></tr>'+
+  procs.flatMap(p=>p.threads.map(t=>`<tr><td>T${t.tid}</td><td>P${p.pid}</td><td>${t.name}</td><td><span class="badge ${t.st}">${t.st}</span></td></tr>`)).join('');
+ const say={WAITING:'Payment being confirmed…',READY:'In line at the kitchen',RUNNING:'Being made right now',DONE:'Ready for pick-up!'};
+ $('story').innerHTML=procs.length?procs.slice().reverse().map(p=>`<div style="margin-bottom:10px"><div class="row" style="border:0"><b>Order #${p.pid}</b><span class="badge ${p.state}">${say[p.state]}</span></div><div class="sm">${p.items.map(x=>x.q+'× '+x.m.n+(x.adds.length?' ('+x.adds.map(a=>get(a).n).join(', ')+')':'')).join(' · ')}</div><div class="bar"><i style="width:${(p.burst-p.rem)/p.burst*100}%"></i></div></div>`).join(''):'<p class="mute">No orders yet. Pick a mochi!</p>';
+ const l=$('log');l.innerHTML=logs.slice(-60).map(x=>`<div>${x}</div>`).join('');l.scrollTop=1e5;
+}
+function checkout(){
+ if(!cart.length)return;
+ const items=cart.map(l=>({m:get(l.id),q:l.q,adds:l.adds.slice()}));
+ const total=items.reduce((a,x)=>a+(x.m.p+x.adds.reduce((s,y)=>s+get(y).p,0))*x.q,0);
+ const p=createProc(items);cart=[];
+ const d=new Date(),vat=(total/1.12*0.12).toFixed(2);
+ $('rc').innerHTML=`<div class="paper"><div class="c"><b style="font-size:16px">PUFF &amp; STUFF</b><br>Mochi Dessert Kiosk<br>Self-service Kiosk No. 01</div><hr>
+ <div class="c">ORDER NUMBER<div class="no">#${p.pid}</div></div><hr>
+ <div class="r"><span>${d.toLocaleDateString()}</span><span>${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+ <div class="r"><span>Order type</span><span>Dine in / Pick-up</span></div><hr>
+ <div class="r"><b>QTY ITEM</b><b>AMT</b></div>`+
+ items.map(x=>`<div class="r"><span>${x.q} ${x.m.n} mochi</span><span>${(x.m.p*x.q).toFixed(2)}</span></div>`+x.adds.map(a=>`<div class="r ind"><span>+ ${get(a).n}</span><span>${(get(a).p*x.q).toFixed(2)}</span></div>`).join('')).join('')+
+ `<hr><div class="r"><span>Subtotal</span><span>${total.toFixed(2)}</span></div><div class="r"><span>VAT (12%) incl.</span><span>${vat}</span></div>
+ <div class="r" style="font-size:15px"><b>TOTAL</b><b>₱${total.toFixed(2)}</b></div><hr>
+ <div class="r"><span>Payment</span><span>E-wallet · PAID</span></div><div class="r"><span>Ref no.</span><span>PS${String(p.pid).padStart(6,'0')}</span></div><hr>
+ <div class="c">Please wait for order #${p.pid}<br>to be called. Show this e-receipt<br>as proof of order.</div><div class="bc"></div>
+ <div class="c" style="font-size:10px;color:#666">PID ${p.pid} · prio ${p.prio} · burst ${p.burst} · sys_create_process</div>
+ <div class="c" style="margin-top:6px">*** THANK YOU! ***</div><button class="btn" style="width:100%;margin-top:12px" id="rcx">Close</button></div>`;
+ $('modal').classList.add('show');$('rcx').onclick=()=>$('modal').classList.remove('show');
+ render();
+}
+function randomOrder(){
+ const fl=MENU.filter(i=>!i.add),n=1+Math.floor(Math.random()*3),items=[];
+ for(let k=0;k<n;k++){const m=fl[Math.floor(Math.random()*fl.length)];const adds=Math.random()<.6?[ADDS[Math.floor(Math.random()*ADDS.length)].id]:[];items.push({m,q:1+Math.floor(Math.random()*2),adds});}
+ createProc(items);render();
+}
+function setPlay(on){playing=on;$('play').textContent=on?'Pause':'Play';clearInterval(timer);if(on)timer=setInterval(tick,+$('spd').value);}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;const D=t.dataset;
+ if(D.t){tab=D.t;renderMenu();}
+ if(D.o){const i=get(D.o);if(i.add)openPick(i);else{cur={id:i.id,q:1,adds:[],line:null};openCustom();}}
+ if(D.t2){const a=cur.adds,k=a.indexOf(D.t2);k<0?a.push(D.t2):a.splice(k,1);openCustom();}
+ if(D.cq){cur.q=Math.max(1,cur.q+ +D.cq);openCustom();}
+ if(D.save){if(cur.line==null)addLine({id:cur.id,q:cur.q,adds:cur.adds.slice()});else cart[cur.line].adds=cur.adds.slice();$('cm').classList.remove('show');renderCart();}
+ if(D.close){$('cm').classList.remove('show');renderCart();}
+ if(D.att){const [k,a]=D.att.split('|'),l=cart[+k],j=l.adds.indexOf(a);j<0?l.adds.push(a):l.adds.splice(j,1);openPick(get(a));renderCart();}
+ if(D.e){cur={id:cart[+D.e].id,q:1,adds:cart[+D.e].adds.slice(),line:+D.e};openCustom();}
+ if(D.u){cart[+D.u].q++;renderCart();}
+ if(D.d){if(--cart[+D.d].q<=0)cart.splice(+D.d,1);renderCart();}
+});
+$('checkout').onclick=checkout;$('rand').onclick=randomOrder;
+$('play').onclick=()=>setPlay(!playing);$('step').onclick=()=>{setPlay(false);tick();};
+$('spd').onchange=()=>playing&&setPlay(true);
+$('reset').onclick=()=>{procs=[];clock=0;running=null;qUsed=0;gantt=[];ctx=0;logs=[];pid=101;seq=0;last=null;cart=[];render();};
+$('vStory').onclick=()=>{document.body.classList.remove('os');$('vStory').className='on';$('vOS').className='';};
+$('vOS').onclick=()=>{document.body.classList.add('os');$('vOS').className='on';$('vStory').className='';};
+renderMenu();render();setPlay(true);
+</script></body></html>
